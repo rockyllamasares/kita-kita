@@ -9,22 +9,22 @@
 - [x] Write and pass unit tests for all API endpoints
 
 ## Phase 2: Core UI Screens
-- [ ] Build Splash/Loading screen
-- [ ] Build Login screen with OAuth button
-- [ ] Build Home/Map screen with map display
-- [ ] Build Group Management screen (list groups, create/join)
-- [ ] Build Group Details screen
-- [ ] Build Settings screen
-- [ ] Build User Profile screen
-- [ ] Implement tab bar navigation
+- [x] Build Splash/Loading screen
+- [x] Build Login screen with OAuth button
+- [x] Build Home/Map screen with map display
+- [x] Build Group Management screen (list groups, create/join)
+- [x] Build Group Details screen
+- [x] Build Settings screen
+- [x] Build User Profile screen
+- [x] Implement tab bar navigation
 
 ## Phase 3: Location & Background Services
-- [ ] Integrate expo-location for foreground location tracking
+- [x] Integrate expo-location for foreground location tracking
 - [ ] Set up expo-task-manager for background location updates
-- [ ] Implement background fetch task for periodic location sync
-- [ ] Create location update service (send to server)
-- [ ] Handle location permissions (request + check)
-- [ ] Implement location polling (configurable intervals: 5s, 10s, 30s, 1min)
+- [x] Implement background fetch task for periodic location sync
+- [x] Create location update service (send to server)
+- [x] Handle location permissions (request + check)
+- [x] Implement location polling (configurable intervals: 5s, 10s, 30s, 1min)
 
 ## Phase 4: Battery Monitoring
 - [ ] Integrate expo-battery for battery status
