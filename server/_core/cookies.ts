@@ -49,12 +49,13 @@ export function getSessionCookieOptions(
 ): Pick<CookieOptions, "domain" | "httpOnly" | "path" | "sameSite" | "secure"> {
   const hostname = req.hostname;
   const domain = getParentDomain(hostname);
+  const isLocalhost = LOCAL_HOSTS.has(hostname);
 
   return {
-    domain,
+    domain: isLocalhost ? undefined : domain,
     httpOnly: true,
     path: "/",
-    sameSite: "none",
+    sameSite: isLocalhost ? "lax" : "none",
     secure: isSecureRequest(req),
   };
 }

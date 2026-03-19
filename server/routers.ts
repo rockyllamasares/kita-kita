@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { COOKIE_NAME } from "../shared/const.js";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { sdk } from "./_core/sdk";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import * as db from "./db";
@@ -20,6 +21,69 @@ export const appRouter = router({
 
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
+    
+    // Demo login for web browser testing only
+    demoLogin: publicProcedure
+      .input(z.object({ deviceId: z.string().optional() }))
+      .mutation(async ({ ctx, input }) => {
+        // Create or get demo user
+        const demoOpenId = `demo-${input.deviceId || "web-" + Date.now()}`;
+        
+        await db.upsertUser({
+          openId: demoOpenId,
+          name: "Demo User",
+          email: "demo@example.com",
+          loginMethod: "demo",
+          lastSignedIn: new Date(),
+        });
+
+        const user = await db.getUserByOpenId(demoOpenId);
+        if (!user) {
+          throw new Error("Failed to create demo user");
+        }
+
+        // Create a demo group for testing
+        try {
+          const existingGroups = await db.getUserGroups(user.id);
+          if (!existingGroups || existingGroups.length === 0) {
+            const demoGroupCode = "DEMO-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            await db.createGroup({
+              name: "Demo Group 📍",
+              description: "Test location sharing group",
+              ownerId: user.id,
+              code: demoGroupCode,
+            });
+
+            // Re-fetch groups
+            await db.getUserGroups(user.id);
+          }
+        } catch (err) {
+          console.error("[demoLogin] Error creating demo group:", err);
+          // Continue anyway - group creation is optional
+        }
+
+        // Create a proper JWT session token
+        const sessionToken = await sdk.createSessionToken(demoOpenId, {
+          name: "Demo User",
+        });
+
+        // Set session cookie with JWT
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, {
+          ...cookieOptions,
+          maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        });
+
+        return {
+          id: user.id,
+          openId: user.openId,
+          name: user.name,
+          email: user.email,
+          loginMethod: user.loginMethod,
+          lastSignedIn: user.lastSignedIn,
+        };
+      }),
+    
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
